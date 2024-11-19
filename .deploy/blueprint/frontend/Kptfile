@@ -28,8 +28,8 @@ pipeline:
     - image: gcr.io/kpt-fn/set-labels:v0.2.0
       configMap:
         app.kubernetes.io/component: react
-        app.kubernetes.io/part-of: website-lead-funnel-frontend
+        app.kubernetes.io/part-of: website-mywolf-login-frontend
         meta.wolf.eu/application: frontend
         meta.wolf.eu/component: react
         meta.wolf.eu/domain: website
-        meta.wolf.eu/product: lead-funnel
+        meta.wolf.eu/product: mywolf-login

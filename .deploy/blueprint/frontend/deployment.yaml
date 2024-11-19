@@ -1,31 +1,31 @@
 apiVersion: apps/v1
 kind: Deployment
-metadata: # kpt-merge: /website-lead-funnel-frontend-react
-  name: website-lead-funnel-frontend-react
+metadata: # kpt-merge: /website-mywolf-login-frontend-react
+  name: website-mywolf-login-frontend-react
   labels:
     app.kubernetes.io/component: react
-    app.kubernetes.io/part-of: website-lead-funnel-frontend
+    app.kubernetes.io/part-of: website-mywolf-login-frontend
     meta.wolf.eu/domain: website
-    meta.wolf.eu/product: lead-funnel
+    meta.wolf.eu/product: mywolf-login
     meta.wolf.eu/application: frontend
     meta.wolf.eu/component: react
   annotations:
-    internal.kpt.dev/upstream-identifier: 'apps|Deployment|default|website-lead-funnel-frontend-react'
+    internal.kpt.dev/upstream-identifier: 'apps|Deployment|default|website-mywolf-login-frontend-react'
 spec:
   selector:
     matchLabels:
       app.kubernetes.io/component: react
-      app.kubernetes.io/part-of: website-lead-funnel-frontend
+      app.kubernetes.io/part-of: website-mywolf-login-frontend
   template:
     metadata:
       labels:
         app.kubernetes.io/component: react
-        app.kubernetes.io/part-of: website-lead-funnel-frontend
+        app.kubernetes.io/part-of: website-mywolf-login-frontend
     spec:
       automountServiceAccountToken: false
       containers:
         - name: react
-          image: msvcweu.azurecr.io/website/lead-funnel-frontend:latest
+          image: msvcweu.azurecr.io/website/mywolf-login-frontend:latest
           ports:
             - name: static
               containerPort: 8080

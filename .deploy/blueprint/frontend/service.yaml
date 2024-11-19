@@ -1,20 +1,20 @@
 apiVersion: v1
 kind: Service
-metadata: # kpt-merge: /website-lead-funnel-frontend-react
-  name: website-lead-funnel-frontend-react
+metadata: # kpt-merge: /website-mywolf-login-frontend-react
+  name: website-mywolf-login-frontend-react
   labels:
     app.kubernetes.io/component: react
-    app.kubernetes.io/part-of: website-lead-funnel-frontend
+    app.kubernetes.io/part-of: website-mywolf-login-frontend
     meta.wolf.eu/domain: website
-    meta.wolf.eu/product: lead-funnel
+    meta.wolf.eu/product: mywolf-login
     meta.wolf.eu/application: frontend
     meta.wolf.eu/component: react
   annotations:
-    internal.kpt.dev/upstream-identifier: '|Service|default|website-lead-funnel-frontend-react'
+    internal.kpt.dev/upstream-identifier: '|Service|default|website-mywolf-login-frontend-react'
 spec:
   selector:
     app.kubernetes.io/component: react
-    app.kubernetes.io/part-of: website-lead-funnel-frontend
+    app.kubernetes.io/part-of: website-mywolf-login-frontend
   ports:
     - name: static
       port: 8080

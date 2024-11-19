@@ -1,8 +1,8 @@
-# website-lead-funnel-frontend
+# website-mywolf-login-frontend
 
-![Validate](https://github.com/wolf-gmbh/website-lead-funnel-frontend/actions/workflows/validate.yaml/badge.svg?branch=main)
+![Validate](https://github.com/wolf-gmbh/website-mywolf-login-frontend/actions/workflows/validate.yaml/badge.svg?branch=main)
 
-Contains the source code of the frontend-application (React) for the lead-management funnel
+Contains the source code of the frontend-application (React) for the myWolf Login
 
 ## Local development without docker
 
