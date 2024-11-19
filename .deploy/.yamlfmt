@@ -1,0 +1,9 @@
+include: ["**/*.yaml", "**/*.yml", "**/Kptfile"]
+line_ending: lf
+doublestar: true
+trim_trailing_whitespace: true
+formatter:
+  type: basic
+  indentless_arrays: true
+  pad_line_comments: 1
+  retain_line_breaks: true

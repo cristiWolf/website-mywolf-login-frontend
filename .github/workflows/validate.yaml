@@ -1,0 +1,74 @@
+name: ValidateCodeChange
+run-name: ${{ github.actor }} is validating a code change
+on:
+  pull_request:
+    branches:
+      - main
+      - release/v[0-9]+.[0-9]+.0
+  push:
+    branches:
+      - main
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set git credentials
+        uses: ./.github/workflows/actions/git-config
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ./node_modules
+          key: ${{ runner.os }}-${{ hashFiles('./pnpm-lock.yaml') }}
+
+      - name: Validate
+        run: ./.github/bin/validate.sh
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.WOLF_GITBOT_PAT }}
+
+      - name: Cache SonarQube scanner
+        uses: actions/cache@v4
+        with:
+          path: ./.dev/tools/sonar/.cache
+          key: sonarqube-cache-${{ hashFiles('sonar-project.properties') }}
+          restore-keys: sonarqube-cache-
+
+      - name: SonarQube Check On PR
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: sonarsource/sonarqube-scan-action@master
+        with:
+          args: >
+            -Dsonar.pullrequest.key=${{ github.event.number }}
+            -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }}
+            -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
+            -Dsonar.scm.revision=${{ github.event.pull_request.head.sha }}
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+          SONAR_USER_HOME: ./.dev/tools/sonar/.cache
+
+      - name: SonarQube Check On Push
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: sonarsource/sonarqube-scan-action@master
+        with:
+          args: >
+            -Dsonar.scm.revision=${{ github.sha }}
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+          SONAR_USER_HOME: ./.dev/tools/sonar/.cache
+
+      - name: SonarQube Quality Gate
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}

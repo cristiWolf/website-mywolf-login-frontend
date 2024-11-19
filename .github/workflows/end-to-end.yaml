@@ -1,0 +1,60 @@
+name: EndToEnd
+run-name: ${{ github.actor }} is running end-to-end tests
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to run tests against'
+        type: choice
+        required: true
+        options:
+          - test
+          - stage
+          - prod
+
+jobs:
+  e2e-tests:
+    runs-on: azure-shared-aks-ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set git credentials
+        uses: ./.github/workflows/actions/git-config
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ./node_modules
+          key: ${{ runner.os }}-${{ hashFiles('./pnpm-lock.yaml') }}
+
+      - name: Run E2E tests | Test Environment
+        if: ${{ inputs.environment == 'test' }}
+        run: ./.github/bin/end-to-end.sh
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.WOLF_GITBOT_PAT }}
+          ENVIRONMENT: ${{ inputs.environment }}
+          VITE_HOST: ${{ vars.VITE_HOST_TEST }}
+          VITE_API_ENDPOINT: ${{ vars.API_ENDPOINT_TEST }}
+
+      - name: Run E2E tests | Stage Environment
+        if: ${{ inputs.environment == 'stage' }}
+        run: ./.github/bin/end-to-end.sh
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.WOLF_GITBOT_PAT }}
+          ENVIRONMENT: ${{ inputs.environment }}
+          VITE_HOST: ${{ vars.VITE_HOST_STAGE }}
+          VITE_API_ENDPOINT: ${{ vars.API_ENDPOINT_STAGE }}
+
+      - name: Run E2E tests | Prod Environment
+        if: ${{ inputs.environment == 'prod' }}
+        run: ./.github/bin/end-to-end.sh
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.WOLF_GITBOT_PAT }}
+          ENVIRONMENT: ${{ inputs.environment }}
+          VITE_HOST: ${{ vars.VITE_HOST_PROD }}
+          VITE_API_ENDPOINT: ${{ vars.API_ENDPOINT_PROD }}

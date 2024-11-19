@@ -1,0 +1,42 @@
+name: StartPreRelease
+run-name: ${{ github.actor }} is starting a new pre-release
+on:
+  workflow_dispatch:
+    branches:
+      - main
+jobs:
+  startPreRelease:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set git credentials
+        uses: ./.github/workflows/actions/git-config
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ./node_modules
+          key: ${{ runner.os }}-${{ hashFiles('./pnpm-lock.yaml') }}
+      - name: Prepare new pre-release
+        run: ./.github/bin/start-pre-release.sh
+        shell: bash
+      - name: Build new pre-release
+        id: build
+        run: ./.github/bin/build.sh
+        shell: bash
+        env:
+          SP_WO_MICROSERVICES_CI_SECRET: ${{ secrets.SP_WO_MICROSERVICES_CI_SECRET }}
+          SP_WO_MICROSERVICES_CI_ID: ${{ secrets.SP_WO_MICROSERVICES_CI_ID }}
+          DOCKER_IMAGE_REGISTRY: ${{ vars.DOCKER_IMAGE_REGISTRY }}
+          DOCKER_IMAGE_REPOSITORY_BASE: ${{ vars.DOCKER_IMAGE_REPOSITORY_BASE }}
+          BUILD_MODE: 'stage'
+          GH_TOKEN: ${{ secrets.WOLF_GITBOT_PAT }}
+      - name: Publish new pre-release
+        run: ./.github/bin/publish.sh
+        shell: bash
+        env:
+          SERVE_STATIC_IMAGE_NAME: ${{ steps.build.outputs.SERVE_STATIC_IMAGE_NAME }}

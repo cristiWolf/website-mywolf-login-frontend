@@ -1,0 +1,15 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: .docker/app/Dockerfile
+      target: app_ci
+    env_file:
+      - .docker.env
+    entrypoint: /bin/sh
+    working_dir: /srv/app
+    volumes:
+      - ./:/srv/app
+    tty: true
+    environment:
+      - VITE_RELEASE=${RELEASE_TAG:-test}

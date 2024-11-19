@@ -1,0 +1,17 @@
+name: 'Set Minimal Git Config'
+description: 'Set minimal git config for use in other actions'
+inputs:
+  name: # git user name
+    required: false
+    default: 'github-actions[bot]'
+    description: 'The name to use for the git user'
+  email: # git user email
+    required: false
+    default: 'github-actions[bot]@users.noreply.github.com'
+    description: 'The email to use for the git user'
+runs:
+  using: 'composite'
+  steps:
+    - run: |
+        git config --global user.email "${{ inputs.email }}" && git config --global user.name "${{ inputs.name }}"
+      shell: bash

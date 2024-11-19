@@ -1,0 +1,48 @@
+name: UpdateRelease
+run-name: ${{ github.actor }} is updating a pre-release or patching a release
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - release/v[0-9]+.[0-9]+.0
+jobs:
+  updateRelease:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.WOLF_GITBOT_PAT }}
+      - name: Set git credentials
+        uses: ./.github/workflows/actions/git-config
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ./node_modules
+          key: ${{ runner.os }}-${{ hashFiles('./pnpm-lock.yaml') }}
+      - name: Update/Patch a (pre-)release
+        run: ./.github/bin/update-release.sh
+        id: update_release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.WOLF_GITBOT_PAT }}
+      - name: Build new (pre-)release
+        id: build
+        run: ./.github/bin/build.sh
+        shell: bash
+        env:
+          SP_WO_MICROSERVICES_CI_SECRET: ${{ secrets.SP_WO_MICROSERVICES_CI_SECRET }}
+          SP_WO_MICROSERVICES_CI_ID: ${{ secrets.SP_WO_MICROSERVICES_CI_ID }}
+          DOCKER_IMAGE_REGISTRY: ${{ vars.DOCKER_IMAGE_REGISTRY }}
+          DOCKER_IMAGE_REPOSITORY_BASE: ${{ vars.DOCKER_IMAGE_REPOSITORY_BASE }}
+          BUILD_MODE: ${{ steps.update_release.outputs.BUILD_MODE }}
+          GH_TOKEN: ${{ secrets.WOLF_GITBOT_PAT }}
+      - name: Publish new release
+        run: ./.github/bin/publish.sh
+        shell: bash
+        env:
+          SERVE_STATIC_IMAGE_NAME: ${{ steps.build.outputs.SERVE_STATIC_IMAGE_NAME }}

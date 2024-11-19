@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: # kpt-merge: /website-lead-funnel-frontend-react
+  name: website-lead-funnel-frontend-react
+  labels:
+    app.kubernetes.io/component: react
+    app.kubernetes.io/part-of: website-lead-funnel-frontend
+    meta.wolf.eu/domain: website
+    meta.wolf.eu/product: lead-funnel
+    meta.wolf.eu/application: frontend
+    meta.wolf.eu/component: react
+  annotations:
+    internal.kpt.dev/upstream-identifier: 'apps|Deployment|default|website-lead-funnel-frontend-react'
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: react
+      app.kubernetes.io/part-of: website-lead-funnel-frontend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: react
+        app.kubernetes.io/part-of: website-lead-funnel-frontend
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: react
+          image: msvcweu.azurecr.io/website/lead-funnel-frontend:latest
+          ports:
+            - name: static
+              containerPort: 8080
+              protocol: TCP
+          resources:
+            limits:
+              memory: 128Mi
+              cpu: 200m
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            runAsNonRoot: true
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+          livenessProbe:
+            failureThreshold: 1
+            periodSeconds: 60
+            timeoutSeconds: 6
+            httpGet:
+              path: /
+              port: 8080
+          readinessProbe:
+            failureThreshold: 1
+            periodSeconds: 60
+            timeoutSeconds: 6
+            httpGet:
+              path: /
+              port: 8080
+          startupProbe:
+            initialDelaySeconds: 100
+            failureThreshold: 10
+            periodSeconds: 10
+            timeoutSeconds: 6
+            httpGet:
+              path: /
+              port: 8080
+      securityContext:
+        fsGroup: 2000
+        seccompProfile:
+          type: RuntimeDefault
+      tolerations:
+        - effect: NoSchedule
+          key: kubernetes.wolf.eu/role
+          operator: Equal
+          value: service
+      volumes:
+        - emptyDir: {}
+          name: tmp

@@ -1,0 +1,29 @@
+apiVersion: bluebrown.github.io/v1alpha1
+kind: KubeAudit
+metadata:
+  name: security
+  annotations:
+    config.kubernetes.io/local-config: 'true'
+# https://github.com/Shopify/kubeaudit#configuration-file
+spec:
+  # by default all auditors are enabled
+  enabledAuditors:
+    apparmor: false
+    asat: false
+    capabilities: true
+    deprecatedapis: true
+    hostns: true
+    image: true
+    limits: true
+    mounts: true
+    netpols: true
+    nonroot: true
+    privesc: true
+    privileged: true
+    rootfs: false
+    seccomp: true
+  # specific auditor configs
+  auditors:
+    limits:
+      cpu: '200m'
+      memory: '128Mi'

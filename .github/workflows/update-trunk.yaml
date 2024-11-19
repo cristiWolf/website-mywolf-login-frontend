@@ -1,0 +1,42 @@
+name: UpdateTrunk
+run-name: ${{ github.actor }} is building and publishing new image(s) for trunk
+on:
+  push:
+    branches:
+      - main
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  buildAndPushForMain:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set git credentials
+        uses: ./.github/workflows/actions/git-config
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ./node_modules
+          key: ${{ runner.os }}-${{ hashFiles('./pnpm-lock.yaml') }}
+      - name: Build new image(s) from trunk
+        id: build
+        run: ./.github/bin/build.sh
+        shell: bash
+        env:
+          SP_WO_MICROSERVICES_CI_SECRET: ${{ secrets.SP_WO_MICROSERVICES_CI_SECRET }}
+          SP_WO_MICROSERVICES_CI_ID: ${{ secrets.SP_WO_MICROSERVICES_CI_ID }}
+          DOCKER_IMAGE_REGISTRY: ${{ vars.DOCKER_IMAGE_REGISTRY }}
+          DOCKER_IMAGE_REPOSITORY_BASE: ${{ vars.DOCKER_IMAGE_REPOSITORY_BASE }}
+          BUILD_MODE: 'dev_test'
+          GH_TOKEN: ${{ secrets.WOLF_GITBOT_PAT }}
+      - name: Publish new image(s)
+        run: ./.github/bin/publish.sh
+        shell: bash
+        id: publish
+        env:
+          SERVE_STATIC_IMAGE_NAME: ${{ steps.build.outputs.SERVE_STATIC_IMAGE_NAME }}

@@ -1,0 +1,35 @@
+apiVersion: kpt.dev/v1
+kind: Kptfile
+metadata:
+  name: react
+  annotations:
+    config.kubernetes.io/local-config: "true"
+upstream:
+  type: git
+  git:
+    repo: git@github.com:wolf-gmbh/common-kpt-blueprints
+    directory: /frontend
+    ref: main
+  updateStrategy: resource-merge
+upstreamLock:
+  type: git
+  git:
+    repo: git@github.com:wolf-gmbh/common-kpt-blueprints
+    directory: /frontend
+    ref: main
+    commit: dba4a036476352e2f071cc643d3d870cadfd6526
+info:
+  description: Frontend Static Nginx Stack Starter
+  keywords:
+    - frontend
+    - starter
+pipeline:
+  mutators:
+    - image: gcr.io/kpt-fn/set-labels:v0.2.0
+      configMap:
+        app.kubernetes.io/component: react
+        app.kubernetes.io/part-of: website-lead-funnel-frontend
+        meta.wolf.eu/application: frontend
+        meta.wolf.eu/component: react
+        meta.wolf.eu/domain: website
+        meta.wolf.eu/product: lead-funnel
